@@ -1,0 +1,3 @@
+This is a mostly simplified test case of the problems I'm having in D.
+
+To build, run dmd metadata.d .
