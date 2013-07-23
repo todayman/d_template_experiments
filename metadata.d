@@ -53,7 +53,7 @@ class FileData
 
     @property {
         // TODO sync attribute without the ()
-        @Sync!(hash, encode_hash)()
+        @Sync!(hash)()
         hash_t hash() const {
             return _hash;
         }
@@ -66,7 +66,7 @@ class FileData
     }
     mixin Signal!(FileData) hashChanged; // TODO should I pass the new value here?
     @property {
-        @Sync!(url, encode_url)() string url() const {
+        @Sync!(url)() string url() const {
             return _url;
         }
         void url(string new_url) {
@@ -78,7 +78,7 @@ class FileData
     }
     mixin Signal!(FileData) urlChanged;
     @property {
-        @Sync!(filesize, encode_filesize)() ulong filesize() const {
+        @Sync!(filesize)() ulong filesize() const {
             return _filesize;
         }
         void filesize(ulong new_filesize) {
@@ -145,34 +145,7 @@ class FileData
                 assert(0);
         }
     }
-   
-    ubyte[] encodeField(string key)()
-    {
-        return encodeField_imp!(__traits(getMember, this, key))();
-    }
-    private ubyte[] encodeField_imp(alias field)()
-        //if( doesFieldSync!field() )
-        //if( __traits(compiles, __traits(getAttributes, field)[0].opCast!(sync.Sync!field)()) )
-        //if( is( typeof(__traits(getAttributes, field)[0]) : sync.Sync!field) )
-    {
-        //alias typeof(field) field_t;
-        enum sync_parameters = __traits(getAttributes, field)[0];
-        // TODO implementation without allocating like this
-        return sync_parameters.encodeField(this);
-    }
-    /*void encodeField(alias field)(ubyte[] result, size_t index)
-        if( __traits(compiles, __traits(getAttributes, field)[0].opCast!(sync.Sync!field))() )
-    {
-        static assert(0);
-    }*/
-   
-    void assign(in FileData other)
-    {
-        this.hash = other.hash;
-        this.url = other.url;
-        this.filesize = other.filesize;
-    }
-    
+
     auto getField(string key)() {
         return __traits(getMember, this, key);
     }
@@ -227,27 +200,4 @@ class FileData
         }
         return result;
     }
-}
-//void encodeField(alias field : hash)(ubyte[] result, size_t index)
-ubyte[] encode_hash(FileData obj)
-{
-    auto result = new ubyte[hash_t.sizeof];
-    result.write(obj.hash, 0);
-    return result;
-}
-//void encodeField(alias field : url)(ubyte[] result, size_t index)
-ubyte[] encode_url(FileData obj)
-{
-    auto result = new ubyte[obj.url.length * char.sizeof];
-    foreach( idx, ch ; obj.url ) {
-        result.write(ch, idx * ch.sizeof);
-    }
-    return result;
-}
-//void encodeField(alias field : filesize)(ubyte[] result, size_t index)
-ubyte[] encode_filesize(FileData obj)
-{
-    auto result = new ubyte[obj.filesize.sizeof];
-    result.write(obj.filesize, 0);
-    return result;
 }

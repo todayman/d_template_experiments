@@ -31,49 +31,11 @@ public bool isSyncType(alias T)() {
     }
 }
 
-public struct Sync(alias T, alias R)
+public struct Sync(alias T)
 {
     private alias Sync_check superclass;
     alias T var;
-    alias R encodeField;
-    //size_t encode_length = S;
-    /*Sync!T opCast(Q : Sync!T)() {
-        assert(0);
-    }*/
 }
 private struct Sync_check
 {
-}
-
-
-string generateGetField(alias field)()
-{
-    string field_name = __traits(identifier, field);
-    pragma(msg, __traits(getAttributes, field));
-    string ret = "auto getField(string key : \"" ~ field_name ~ "\")() {\n";
-    ret ~= "    return this." ~ field_name ~ ";\n";
-    ret ~= "}";
-    return ret;
-}
-mixin template encodeField(alias field)
-{
-    /*void encodeField_ext(alias key)(T obj, ubyte[] result, size_t index)
-    {
-        import std.stdio;
-        //auto value = ;
-        //pragma(msg, __traits(getMember, obj, key));
-        //auto traits = __traits(getAttributes, __traits(getMember, obj, key));
-        auto traits = __traits(getAttributes, key);
-        writeln("traits = ", traits);
-        //pragma(msg, traits);
-        static if( is( traits[0] : Sync) ) {
-            pragma(msg, "Hello************************");
-        }
-    }*/
-    typeof(field) getField(string key)()
-        if ( key == __traits(identifier, field) )
-    {
-        pragma(msg, "Hello!");
-        return field;
-    }
 }
