@@ -18,24 +18,7 @@
 
 module sync;
 
-import std.stdio;
-private import std.traits;
-
-public bool isSyncType(alias T)() {
-    static if( is( T.superclass == Sync_check ) ) {
-        return true;
-    }
-    else {
-        static assert(0);
-        return false;
-    }
-}
-
 public struct Sync(alias T)
 {
-    private alias Sync_check superclass;
     alias T var;
-}
-private struct Sync_check
-{
 }

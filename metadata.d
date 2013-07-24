@@ -23,6 +23,7 @@ private import std.bitmanip;
 private import std.system;
 private import std.exception : enforce;
 private import std.conv : to;
+private import std.typetuple;
 
 private import sync;
 
@@ -151,43 +152,27 @@ class FileData
     }
 
     static bool doesFieldSync(string key)() {
-        //static if( key[0] == '_' ) {
-        //    return false;
-        //}
-        static if( __traits(compiles, __traits(getMember, FileData,key)) ) {
-            return doesFieldSync_imp!(__traits(getMember, FileData, key)) ();
-            //alias mixin("FileData." ~ key) field;
-            static if( __traits(getAttributes, mixin("FileData." ~ key)).length == 0 ) {
+        static if( __traits(compiles, __traits(getAttributes, mixin("FileData." ~ key)))) {
+            alias attrs = TypeTuple!(__traits(getAttributes, mixin("FileData." ~ key)));
+            static if( attrs.length == 0 ) {
+                pragma(msg, "Member " ~ key ~ " does not sync.");
                 return false;
             }
             else {
-                //sync.isSyncType!(__traits(getAttributes, __traits(getMember, new FileData(),key))[0]);
-                //return doesFieldSync!(__traits(getMember, fd, key))();
-                return false;
+                enum result = staticIndexOf!(Sync, typeof(attrs)) != 0;
+                static if(result) {
+                    pragma(msg, "Member " ~ key ~ " syncs.");
+                }
+                else {
+                    pragma(msg, "Member " ~ key ~ " does not sync.");
+                }
+                return result;
             }
         }
         else {
-            pragma(msg, "no compile for " ~ key);
+            pragma(msg, "Member " ~ key ~ " does not sync.");
             return false;
         }
-    }
-    static bool doesFieldSync_imp(alias field)() {
-        /*immutable attribs = __traits(getAttributes, field);
-        static if( attribs.length == 0 ) {
-            //pragma(msg, "field " ~ __traits(identifier, field) ~ " does not sync");
-            return false;
-        }
-        else {
-            alias typeof(attribs[0]).superclass s; 
-            static if( is( s : sync.Sync!field) ) {
-                pragma(msg, "field " ~ __traits(identifier, field) ~ " syncs");
-            }
-            else {
-                pragma(msg, "field " ~ __traits(identifier, field) ~ " does not sync");
-            }
-            return is( s : sync.Sync!field);
-        }*/
-        return false;
     }
     // This is the method I'm trying to write
     static string[] syncableFields() {
